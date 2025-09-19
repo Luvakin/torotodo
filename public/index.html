@@ -7,43 +7,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="stylesheet" href="style.css">
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            'bg': '#0f172a',
-            'card': '#111827',
-            'text': '#f1f5f9',
-            'muted': '#94a3b8',
-            'accent': '#3b82f6',
-            'accent-hover': '#2563eb',
-            'danger': '#ef4444',
-            'danger-hover': '#dc2626',
-            'border': '#1e293b',
-            'border-light': '#334155',
+            'bg': 'var(--bg)',
+            'card': 'var(--card)',
+            'text': 'var(--text)',
+            'muted': 'var(--muted)',
+            'accent': 'var(--accent)',
+            'accent-hover': 'var(--accent-hover)',
+            'danger': 'var(--danger)',
+            'danger-hover': 'var(--danger-hover)',
+            'border': 'var(--border)',
+            'border-light': 'var(--border-light)',
           }
         }
       }
     }
   </script>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #0b1223 0%, #0f172a 50%, #0a0f1c 100%);
-      min-height: 100vh;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .animate-fade-in {
-      animation: fadeIn 0.6s ease-out;
-    }
-
-  </style>
 </head>
 
 <body>
@@ -89,6 +73,9 @@
         <div class="flex gap-2 flex-wrap">
           <button class="ghost px-4 py-2 rounded-xl bg-transparent text-muted border border-border-light cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:text-accent hover:border-accent" id="exportBtn" title="Export as JSON">Export</button>
           <button class="ghost px-4 py-2 rounded-xl bg-transparent text-muted border border-border-light cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:text-accent hover:border-accent" id="importBtn" title="Import from JSON">Import</button>
+          <button class="ghost px-4 py-2 rounded-xl bg-transparent text-muted border border-border-light cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:text-accent hover:border-accent" id="theme-toggle" title="Toggle theme">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          </button>
           <input type="file" id="fileInput" accept="application/json" hidden />
         </div>
       </section>
@@ -358,6 +345,45 @@
       updateStorageInfo();
       render();
     });
+  </script>
+  <script>
+    // --- Theme Switcher ------------------------------------------------------
+    const themeToggle = document.getElementById('theme-toggle');
+    const lsThemeKey = 'theme.v1';
+
+    const moonIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    `;
+    const sunIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+    `;
+
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.innerHTML = sunIcon;
+        localStorage.setItem(lsThemeKey, 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeToggle.innerHTML = moonIcon;
+        localStorage.setItem(lsThemeKey, 'light');
+      }
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    });
+
+    // Load initial theme
+    const savedTheme = localStorage.getItem(lsThemeKey);
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else {
+      // Default to system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(prefersDark ? 'dark' : 'light');
+    }
   </script>
 </body>
 
