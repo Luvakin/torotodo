@@ -71,7 +71,8 @@
 
       <section class="mt-6 pt-5 border-t border-border">
         <div class="flex gap-2 flex-wrap">
-          <button class="ghost px-4 py-2 rounded-xl bg-transparent text-muted border border-border-light cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:text-accent hover:border-accent" id="exportBtn" title="Export as JSON">Export</button>
+          <button class="ghost px-4 py-2 rounded-xl bg-transparent text-muted border border-border-light cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:text-accent hover:border-accent" id="exportBtn" title="Export as JSON">Export JSON</button>
+          <button class="ghost px-4 py-2 rounded-xl bg-transparent text-muted border border-border-light cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:text-accent hover:border-accent" id="exportCsvBtn" title="Export as CSV">Export CSV</button>
           <button class="ghost px-4 py-2 rounded-xl bg-transparent text-muted border border-border-light cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:text-accent hover:border-accent" id="importBtn" title="Import from JSON">Import</button>
           <button class="ghost px-4 py-2 rounded-xl bg-transparent text-muted border border-border-light cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:text-accent hover:border-accent" id="theme-toggle" title="Toggle theme">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
@@ -248,6 +249,45 @@
         URL.revokeObjectURL(url);
       }
 
+      function exportCSV() {
+        const headers = ['id', 'title', 'completed', 'createdAt', 'dueAt'];
+
+        const escapeCsvCell = (cell) => {
+          if (cell === null || cell === undefined) {
+            return '';
+          }
+          let str = String(cell);
+          if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            str = str.replace(/"/g, '""');
+            return `"${str}"`;
+          }
+          return str;
+        };
+
+        const csvRows = [headers.join(',')];
+
+        state.todos.forEach(todo => {
+          const row = [
+            todo.id,
+            escapeCsvCell(todo.title),
+            todo.completed,
+            todo.createdAt,
+            '' // dueAt is empty
+          ];
+          csvRows.push(row.join(','));
+        });
+
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const $a = $('<a>').attr({ href: url, download: 'todos.csv' });
+
+        $('body').append($a);
+        $a[0].click();
+        $a.remove();
+        URL.revokeObjectURL(url);
+      }
+
       function importJSON(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -301,6 +341,7 @@
       });
 
       $("#exportBtn").on('click', exportJSON);
+      $("#exportCsvBtn").on('click', exportCSV);
       
       $("#importBtn").on('click', function() {
         $("#fileInput").click();
